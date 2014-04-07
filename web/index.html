@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title>Collab Host</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <script src="vendor/peer.js"></script>
+  <script src="collab.js"></script>
+</head>
+<body>
+
+<h1>Collaborative Editing Time!</h1>
+
+<p>
+  This is a tech demo of a real time collaborative editor using WebRTC. To try it out, simply open this page in a
+  browser, and open `<a href="client.html">client.html</a>` in another tab or a WebRTC enabled browser.
+</p>
+<button onclick="sync()">Sync!</button>
+<h2>Title</h2>
+
+<div id="editor-a" data-key="editorA" class="synced-editor">
+  <div class="editor-owner hidden"></div>
+
+  <h3 contenteditable="true" class="editor-content"> This is an editable title! </h3>
+</div>
+
+<h3>Preamble</h3>
+
+<div id="editor-b" data-key="editorB" class="synced-editor">
+  <div class="editor-owner hidden"></div>
+  <div contenteditable="true" class="editor-content">
+    <p>This preamble is editable.</p>
+  </div>
+</div>
+
+<h3>Body</h3>
+
+<div id="editor-c" data-key="editorC" class="synced-editor">
+  <div class="editor-owner hidden"></div>
+  <div contenteditable="true" class="editor-content">
+    <p>This section is editable.</p>
+
+    <p>Wouldn't it be cool if stuff you changed here were immediately synchronised with another editor or browser?</p>
+
+    <p>Try editing this paragraph!</p>
+  </div>
+</div>
+
+<script>
+  var peerId = 'superfoodev';
+  var peer = new Peer(peerId, {key: 'lwjd5qra8257b9'});
+  //  var peer = new Peer(peerId, {host: 'localhost', port: 9000});
+  var connections = [];
+
+  var data = {
+    editorA: {locked: false, content: '', key: 'editorA'},
+    editorB: {locked: false, content: '', key: 'editorB'},
+    editorC: {locked: false, content: '', key: 'editorC'}
+  };
+
+  var editors = collab.initEditors('.synced-editor');
+
+  function sync() {
+    collab.sendData(collab.gatherData(data, editors), connections);
+  }
+
+  peer.on('open', function (id) {
+    console.log('My peer ID is: ' + id);
+    collab.registerListeners(editors, sync, 'Master');
+  });
+
+  peer.on('connection', function (connection) {
+    connections.push(connection);
+    console.log('someone connected', arguments);
+
+    connection.on('data', function (newData) {
+      console.log('Got data', newData);
+      data = newData;
+      collab.render(data, editors);
+      connections.forEach(function (conn) {
+        if (conn !== connection) {
+          conn.send(data);
+        }
+      });
+    });
+  });
+
+</script>
+</body>
+</html>

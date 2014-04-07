@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title>Collab Client</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <script src="vendor/peer.js"></script>
+  <script src="collab.js"></script>
+</head>
+<body>
+
+<h1>Client</h1>
+
+<h2>Title</h2>
+
+<div id="editor-a" data-key="editorA" class="synced-editor">
+  <div class="editor-owner hidden"></div>
+  <h3 contenteditable="true" class="editor-content"></h3>
+</div>
+
+<h2>Preamble</h2>
+
+<div id="editor-b" data-key="editorB" class="synced-editor">
+  <div class="editor-owner hidden"></div>
+  <div contenteditable="true" class="editor-content"></div>
+</div>
+<h2>Body</h2>
+
+<div id="editor-c" data-key="editorC" class="synced-editor">
+  <div class="editor-owner hidden"></div>
+  <div contenteditable="true" class="editor-content"></div>
+</div>
+
+<script>
+  var remotePeerId = 'superfoodev';
+  var peer = new Peer({key: 'lwjd5qra8257b9'});
+  //  var peer = new Peer({host: 'localhost', port: 9000});
+  var conn;
+  var data = {};
+  var editors = collab.initEditors('.synced-editor');
+
+  function sync() {
+    collab.sendData(collab.gatherData(data, editors), [conn]);
+  }
+
+  connect();
+
+  function connect() {
+    conn = peer.connect(remotePeerId);
+    collab.registerListeners(editors, sync, conn.id);
+    console.log('My peer ID is: ' + conn.id);
+
+    conn.on('data', function (newData) {
+      console.log('Got data', newData);
+      data = newData;
+      collab.render(data, editors);
+    });
+  }
+
+</script>
+</body>
+</html>

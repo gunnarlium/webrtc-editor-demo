@@ -1,0 +1,26 @@
+body {
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-size: 13px;
+}
+
+.locked {
+  background: #ccc;
+}
+
+.editor-owner {
+  display: inline-block;
+  font-size: 11px;
+  border: 1px solid #ccc;
+  padding: 3px 10px;
+  font-weight: bold;
+}
+
+.editor-content {
+  font-size: 13px;
+  border: 1px solid #ccc;
+  padding: 5px;
+}
+
+.hidden {
+  display: none;
+}
